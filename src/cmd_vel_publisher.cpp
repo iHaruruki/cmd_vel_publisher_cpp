@@ -1,4 +1,5 @@
 #include <chrono>
+#include <iostream>
 #include <memory>
 #include <functional>
 
@@ -36,7 +37,7 @@ private:
     // 次の2秒間で左回転
     else if (elapsed < 5.0) {
       msg.linear.x = 0.0;
-      msg.angular.z = 1.0;  // 左回転（角速度は正方向）
+      msg.angular.z = 1.0;
       RCLCPP_INFO(this->get_logger(), "左回転中: 角速度 %.2f rad/s, 経過時間: %.2f 秒", msg.angular.z, elapsed);
     }
     // 次の3秒間で前進
@@ -65,9 +66,18 @@ private:
 
 int main(int argc, char * argv[])
 {
+  // プログラム開始時の時刻を記録
+  auto program_start = std::chrono::high_resolution_clock::now();
+
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<CmdVelPublisher>());
+  auto node = std::make_shared<CmdVelPublisher>();
+  rclcpp::spin(node);
   rclcpp::shutdown();
+
+  // プログラム終了時の時刻を記録
+  auto program_end = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double> elapsed = program_end - program_start;
+  std::cout << "プログラム全体の実行時間: " << elapsed.count() << " 秒" << std::endl;
+
   return 0;
 }
-
